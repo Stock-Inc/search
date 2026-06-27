@@ -1,0 +1,8 @@
+if curl -fsS http://elasticsearch:9200/documents > /dev/null; then
+      echo "Elasticsearch index 'documents' already exists"
+    else
+      curl -fsS -X PUT http://elasticsearch:9200/documents \
+        -H "Content-Type: application/json" \
+        --data-binary @documents-index.json
+      echo "Elasticsearch index 'documents' created"
+    fi

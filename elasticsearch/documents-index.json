@@ -1,0 +1,68 @@
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "russian_stop": {
+          "type": "stop",
+          "stopwords": "_russian_"
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        }
+      },
+      "analyzer": {
+        "analysis-ru": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "russian_stop",
+            "russian_stemmer"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "analysis-ru",
+        "search_analyzer": "analysis-ru",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "analysis-ru",
+        "search_analyzer": "analysis-ru"
+      },
+      "summary": {
+        "type": "text",
+        "analyzer": "analysis-ru",
+        "search_analyzer": "analysis-ru"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  }
+}
