@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
-    const [files, setFiles] = useState(new Map());
+    const [files, setFiles] = useState<Map<string, File>>(new Map());
+    const inputRef = useRef(null);
     
     function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault();
@@ -38,6 +39,17 @@ export default function Upload() {
         });
     }
     
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const fileList = e.target.files;
+        setFiles(s => {
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList.item(i);    
+                s.set(file.name, file);
+            }
+            return s;
+        });
+    }
+    
     return (
         <div className="w-full h-screen flex flex-col justify-center items-center">
             <Card
@@ -49,12 +61,19 @@ export default function Upload() {
             >
                 <p className="text-2xl">Upload a file for scanning</p>
                 <UploadIcon className={`transition-all size-20 ${isDragging && "scale-125"}`} />
-                <p className="text-xl underline">Drag and drop or click to select</p>
+                <p
+                    className="text-xl underline cursor-pointer"
+                    onClick={_ => {
+                        inputRef.current.click();
+                    }}
+                >Drag and drop or click to select</p>
             </Card>
             <input
+                ref={inputRef}
                 type="file"
                 hidden
                 multiple
+                onChange={handleInputChange}
             />
         </div>
     )
