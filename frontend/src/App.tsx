@@ -1,9 +1,17 @@
+import { createBrowserRouter, RouterProvider } from "react-router";
+import Upload from "./components/pages/Upload";
+
 function App() {
 
+    const router = createBrowserRouter([
+        {
+            path: "/",
+            Component: Upload
+        }
+    ]);
+    
     return (
-        <div>
-          
-        </div>
+        <RouterProvider router={router}/>
     );
 }
 
