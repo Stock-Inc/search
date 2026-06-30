@@ -1,6 +1,7 @@
 import { UploadIcon } from "lucide-react";
-import { Card } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { useRef, useState } from "react";
+import UploadProgressDrawer from "../UploadProgressDrawer";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
@@ -31,43 +32,56 @@ export default function Upload() {
         setIsDragging(false);
         const transferredFiles = e.dataTransfer.files;
         setFiles(s => {
+            const newState = new Map(s);
             for (let i = 0; i < transferredFiles.length; i++) {
                 const file = transferredFiles.item(i);    
-                s.set(file.name, file);
+                newState.set(file.name, file);
             }
-            return s;
+            return newState;
         });
     }
     
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const fileList = e.target.files;
         setFiles(s => {
+            const newState = new Map(s);
             for (let i = 0; i < fileList.length; i++) {
                 const file = fileList.item(i);    
-                s.set(file.name, file);
+                newState.set(file.name, file);
             }
-            return s;
+            return newState;
         });
     }
     
     return (
-        <div className="w-full h-screen flex flex-col justify-center items-center">
+        <div className="w-full h-screen flex flex-col justify-between items-center p-6">
+            <div>Search</div>
             <Card
-                className="p-10 border-2 flex flex-col items-center space-y-8"
+                className="border-2"
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                <p className="text-2xl">Upload a file for scanning</p>
-                <UploadIcon className={`transition-all size-20 ${isDragging && "scale-125"}`} />
-                <p
-                    className="text-xl underline cursor-pointer"
-                    onClick={_ => {
-                        inputRef.current.click();
-                    }}
-                >Drag and drop or click to select</p>
+                <CardContent
+                    className=" flex flex-col items-center sm:space-y-8 space-y-4"
+                >
+                    <p className="text-2xl">Upload a file for scanning</p>
+                    <UploadIcon className={`transition-all size-15 sm:size-20 ${isDragging && "scale-125"}`} />
+                    <p
+                        className="text-xl underline cursor-pointer"
+                        onClick={_ => {
+                            inputRef.current.click();
+                        }}
+                    >Drag and drop or click to select</p>
+                </CardContent>
             </Card>
+            <div className="flex flex-col justify-center items-center space-y-2">
+                <p className="flex flex-col text-center">
+                    Uploading {files.size} files
+                </p>
+                <UploadProgressDrawer fileList={files}/>
+            </div>
             <input
                 ref={inputRef}
                 type="file"
