@@ -2,6 +2,9 @@ import { UploadIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { useRef, useState } from "react";
 import UploadProgressDrawer from "../UploadProgressDrawer";
+import { Field } from "../ui/field";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
@@ -55,7 +58,12 @@ export default function Upload() {
     
     return (
         <div className="w-full h-screen flex flex-col justify-between items-center p-6">
-            <div>Search</div>
+            <Field className="sm:w-xl" orientation="horizontal">
+                <Input className="md:text-lg" placeholder="Search across uploaded files"/>
+                <Button variant="secondary">
+                    Search
+                </Button>
+            </Field>
             <Card
                 className="border-2"
                 onDragEnter={handleDragEnter}
@@ -64,7 +72,7 @@ export default function Upload() {
                 onDrop={handleDrop}
             >
                 <CardContent
-                    className=" flex flex-col items-center sm:space-y-8 space-y-4"
+                    className="max-sm:px-2 flex flex-col items-center sm:space-y-8 space-y-4 text-center"
                 >
                     <p className="text-2xl">Upload a file for scanning</p>
                     <UploadIcon className={`transition-all size-15 sm:size-20 ${isDragging && "scale-125"}`} />
