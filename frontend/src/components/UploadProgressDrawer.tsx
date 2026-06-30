@@ -4,6 +4,7 @@ import { Card, CardContent } from "./ui/card";
 import { Spinner } from "./ui/spinner";
 import { Check, CloudAlert } from "lucide-react";
 import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
 
 function Content(
     {
@@ -14,12 +15,12 @@ function Content(
 ) {
     return (
         <DrawerContent className="h-full">
-            <div>
+            <ScrollArea className={"overflow-auto"}>
                 {
                     [...fileList].map(([name, file]) => (
                         <Card className="" key={name}>
                             <CardContent className="flex justify-between items-center">
-                                <p className="text-lg">
+                                <p className="text-lg text-ellipsis max-w-[25ch] wrap-break-word line-clamp-1">
                                     {name}
                                 </p>
                                 { 
@@ -32,7 +33,7 @@ function Content(
                         </Card>
                     ))
                 }
-            </div>
+            </ScrollArea>
         </DrawerContent>
     );
 }
