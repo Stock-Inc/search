@@ -1,10 +1,12 @@
-import { useEffect } from "react";
-import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
 import { Card, CardContent } from "./ui/card";
 import { Spinner } from "./ui/spinner";
 import { Check, CloudAlert } from "lucide-react";
-import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import { Sheet, SheetContent } from "./ui/sheet";
+import { Field } from "./ui/field";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
 
 function Content(
     {
@@ -14,7 +16,14 @@ function Content(
     }
 ) {
     return (
-        <DrawerContent className="h-full">
+        <SheetContent showCloseButton={false} side="bottom" className={"max-h-[50vh] overflow-auto flex flex-col space-y-4"}> 
+            <Field className="px-4 pt-4" orientation="horizontal">
+                <Input className="md:text-lg " placeholder="Search across uploaded files"/>
+                <Button variant="secondary">
+                    Search
+                </Button>
+            </Field>
+            <Separator/>
             <ScrollArea className={"overflow-auto"}>
                 {
                     [...fileList].map(([name, file]) => (
@@ -34,7 +43,7 @@ function Content(
                     ))
                 }
             </ScrollArea>
-        </DrawerContent>
+        </SheetContent>
     );
 }
 
@@ -45,31 +54,9 @@ export default function UploadProgressDrawer(
         fileList: Map<string, File>
     }
 ) {
-    useEffect(() => {
-        console.log(fileList.size);
-    }, [fileList])
     return (
-        <>
-            <div className="sm:hidden">
-                <Drawer modal={false}>
-                    <DrawerTrigger asChild>
-                        <Button variant="outline">
-                            View Upload Progress
-                        </Button>
-                    </DrawerTrigger>
-                    <Content fileList={fileList}/>
-                </Drawer>
-            </div>
-            <div className="max-sm:hidden">
-                <Drawer direction="right" modal={false}>
-                    <DrawerTrigger asChild>
-                        <Button variant="outline">
-                           View Upload Progress 
-                        </Button>
-                    </DrawerTrigger>
-                    <Content fileList={fileList}/>
-                </Drawer>
-            </div> 
-        </>
+            <Sheet open={fileList.size > 0} modal={false} disablePointerDismissal>
+                <Content fileList={fileList}/>
+            </Sheet>
     );
 }

@@ -57,22 +57,16 @@ export default function Upload() {
     }
     
     return (
-        <div className="w-full h-screen flex flex-col justify-between items-center p-6">
-            <Field className="sm:w-xl" orientation="horizontal">
-                <Input className="md:text-lg" placeholder="Search across uploaded files"/>
-                <Button variant="secondary">
-                    Search
-                </Button>
-            </Field>
+        <div className="w-full h-screen flex flex-col space-y-10 items-center p-6">
             <Card
-                className="border-2"
+                className="border-2 my-auto"
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
                 <CardContent
-                    className="max-sm:px-2 flex flex-col items-center sm:space-y-8 space-y-4 text-center"
+                    className="flex flex-col items-center sm:space-y-8 space-y-4 text-center"
                 >
                     <p className="text-2xl">Upload a file for scanning</p>
                     <UploadIcon className={`transition-all size-15 sm:size-20 ${isDragging && "scale-125"}`} />
@@ -84,12 +78,8 @@ export default function Upload() {
                     >Drag and drop or click to select</p>
                 </CardContent>
             </Card>
-            <div className="flex flex-col justify-center items-center space-y-2">
-                <p className="flex flex-col text-center">
-                    Uploading {files.size} files
-                </p>
-                <UploadProgressDrawer fileList={files}/>
-            </div>
+            <div className="h-[50vh]"/>
+            <UploadProgressDrawer fileList={files}/>
             <input
                 ref={inputRef}
                 type="file"
