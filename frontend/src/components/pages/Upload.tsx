@@ -2,12 +2,13 @@ import { UploadIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { useRef, useState } from "react";
 import UploadProgressDrawer from "../UploadProgressDrawer";
-import type { FileHandle } from "@/lib/types";
+import { useAtom } from "jotai";
+import { fileAtom } from "@/lib/atoms";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
-    const [files, setFiles] = useState<Map<string, FileHandle>>(new Map());
+    const [files, setFiles] = useAtom(fileAtom);
     const inputRef = useRef(null);
     
     function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {

@@ -4,10 +4,13 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Home, SearchIcon } from "lucide-react";
+import { useAtomValue } from "jotai";
+import { fileAtom } from "@/lib/atoms";
 
 export default function Search() {
+    const files = useAtomValue(fileAtom);
     const [params, setParams] = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState(params.get("query"));
+    const [searchQuery, setSearchQuery] = useState(params.get("query") ?? "");
     function updateSearchQuery() {
         const nextParams = new URLSearchParams(params);
         nextParams.set("query", searchQuery);
@@ -22,7 +25,7 @@ export default function Search() {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                 />
-                <Button onClick={updateSearchQuery} variant="secondary">
+                <Button disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
                     <SearchIcon/>
                 </Button>
                 <Link to={"/"}>
@@ -31,7 +34,9 @@ export default function Search() {
                     </Button>
                 </Link>
             </Field>
-            <p>Nothing found</p>
+            {
+                files.size === 0 ? <p>Upload files to start searching!</p> : <p>Nothing found</p>
+            }
         </div>
     );
 }
