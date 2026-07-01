@@ -2,14 +2,12 @@ import { UploadIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { useRef, useState } from "react";
 import UploadProgressDrawer from "../UploadProgressDrawer";
-import { Field } from "../ui/field";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import type { FileHandle } from "@/lib/types";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
-    const [files, setFiles] = useState<Map<string, File>>(new Map());
+    const [files, setFiles] = useState<Map<string, FileHandle>>(new Map());
     const inputRef = useRef(null);
     
     function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
@@ -38,7 +36,7 @@ export default function Upload() {
             const newState = new Map(s);
             for (let i = 0; i < transferredFiles.length; i++) {
                 const file = transferredFiles.item(i);    
-                newState.set(file.name, file);
+                newState.set(file.name, { file, uploadStatus: "uploading" });
             }
             return newState;
         });
@@ -50,7 +48,7 @@ export default function Upload() {
             const newState = new Map(s);
             for (let i = 0; i < fileList.length; i++) {
                 const file = fileList.item(i);    
-                newState.set(file.name, file);
+                newState.set(file.name, { file, uploadStatus: "uploading" });
             }
             return newState;
         });
