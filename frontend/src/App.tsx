@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
 import Upload from "./components/pages/Upload";
+import Search from "./components/pages/Search";
 
 function App() {
 
@@ -7,6 +8,10 @@ function App() {
         {
             path: "/",
             Component: Upload
+        },
+        {
+            path: "search",
+            Component: Search
         }
     ]);
     

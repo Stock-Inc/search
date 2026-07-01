@@ -8,6 +8,8 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import type { FileHandle } from "@/lib/types";
+import { useState } from "react";
+import { Link } from "react-router";
 
 export default function UploadProgressDrawer(
     {
@@ -16,14 +18,23 @@ export default function UploadProgressDrawer(
         fileList: Map<string, FileHandle>
     }
 ) {
+    const [searchQuery, setSearchQuery] = useState("");
+    
     return (
             <Sheet open={fileList.size > 0} modal={false} disablePointerDismissal>
                 <SheetContent showCloseButton={false} side="bottom" className={"max-h-[50vh] overflow-auto flex flex-col space-y-4"}> 
                     <Field className="px-4 pt-4" orientation="horizontal">
-                        <Input className="md:text-lg " placeholder="Search across uploaded files"/>
-                        <Button variant="secondary">
-                            Search
-                        </Button>
+                        <Input
+                            className="md:text-lg "
+                            placeholder="Search across uploaded files"
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                        />
+                            <Link to={`search?query=${searchQuery}`}>
+                                <Button variant="secondary">
+                                    Search
+                                </Button>
+                            </Link>
                     </Field>
                     <Separator/>
                     <ScrollArea className={"overflow-auto"}>
