@@ -23,3 +23,10 @@ docker compose up --build
 ```sh
 sh init.sh
 ```
+## backend
+
+```sh
+docker compose up --build -d
+```
+Для тестирования:
+- http://localhost:8080/swagger-ui/swagger-ui/index.html
