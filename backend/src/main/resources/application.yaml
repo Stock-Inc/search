@@ -2,10 +2,19 @@ spring:
   application:
     name: backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: myuser
-    password: secret
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mydatabase}
+    username: ${SPRING_DATASOURCE_USERNAME:myuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      repositories:
+        enabled: false
   servlet:
     multipart:
       max-file-size: 20MB
@@ -13,6 +22,32 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    open-in-view: false
 server:
   tomcat:
     max-swallow-size: -1
+elasticsearch:
+  url: ${ELASTICSEARCH_URL:http://localhost:9200}
+storage:
+  upload-dir: ${UPLOAD_DIR:uploads}
+springdoc:
+  swagger-ui:
+    path: /docs
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+    tags:
+      application: ${spring.application.name}
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+logging:
+  level:
+    root: INFO
+    backend.app.api: INFO

@@ -30,6 +30,19 @@ public class DocumentTextExtractor {
         throw new IllegalArgumentException("Supported formats: PDF, DOCX");
     }
 
+    public static List<DocumentChunk> extractChunks(Path filePath) throws IOException {
+        String fileName = filePath.getFileName().toString().toLowerCase();
+
+        if (fileName.endsWith(".pdf")) {
+            return extractPdfChunks(filePath);
+        }
+        if (fileName.endsWith(".docx")) {
+            return splitIntoDocumentChunks(extractDocx(filePath), 1, 0);
+        }
+
+        throw new IllegalArgumentException("Supported formats: PDF, DOCX");
+    }
+
     public static List<String> splitIntoChunks(String text) {
         List<String> chunks = new ArrayList<>();
         if (text == null || text.isBlank()) {
@@ -54,6 +67,19 @@ public class DocumentTextExtractor {
         }
     }
 
+    private static List<DocumentChunk> extractPdfChunks(Path filePath) throws IOException {
+        List<DocumentChunk> chunks = new ArrayList<>();
+        try (PDDocument document = Loader.loadPDF(filePath.toFile())) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            for (int page = 1; page <= document.getNumberOfPages(); page++) {
+                stripper.setStartPage(page);
+                stripper.setEndPage(page);
+                chunks.addAll(splitIntoDocumentChunks(stripper.getText(document), page, chunks.size()));
+            }
+        }
+        return chunks;
+    }
+
     private static String extractDocx(Path filePath) throws IOException {
         try (InputStream inputStream = Files.newInputStream(filePath);
              XWPFDocument document = new XWPFDocument(inputStream)) {
@@ -61,5 +87,14 @@ public class DocumentTextExtractor {
             document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
             return text.toString();
         }
+    }
+
+    private static List<DocumentChunk> splitIntoDocumentChunks(String text, int pageNumber, int startIndex) {
+        List<DocumentChunk> chunks = new ArrayList<>();
+        List<String> textChunks = splitIntoChunks(text);
+        for (int i = 0; i < textChunks.size(); i++) {
+            chunks.add(new DocumentChunk(startIndex + i, pageNumber, textChunks.get(i)));
+        }
+        return chunks;
     }
 }
