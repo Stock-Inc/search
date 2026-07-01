@@ -53,9 +53,9 @@ export default function UploadProgressDrawer(
                                         </p>
                                         { 
                                             //TODO: add tooltips
-                                            handle.uploadStatus === "uploading" ? <Spinner className="scale-150" />
-                                                : handle.uploadStatus === "done" ? <Check className="text-green-500" size={25} />
-                                                    : <CloudAlert className="text-red-500" size={25} />
+                                            handle.uploadStatus === "uploading" ? <Spinner aria-label="Uploading" className="scale-150" />
+                                                : handle.uploadStatus === "done" ? <Check aria-label="Done" className="text-green-500" size={25} />
+                                                    : <CloudAlert aria-label="Failed" className="text-red-500" size={25} />
                                         }
                                     </CardContent>
                                 </Card>

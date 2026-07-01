@@ -77,7 +77,7 @@ export default function Upload() {
                     >Drag and drop or click to select</p>
                 </CardContent>
             </Card>
-            <div className="h-[50vh]"/>
+            <div aria-hidden className="h-[50vh]"/>
             <UploadProgressDrawer fileList={files}/>
             <input
                 ref={inputRef}

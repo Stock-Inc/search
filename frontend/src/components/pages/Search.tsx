@@ -20,7 +20,7 @@ export default function Search() {
         <div className="flex flex-col h-screen w-full space-y-8 sm:p-10 p-4 items-center">
             <Field className="px-4 pt-4 max-w-xl" orientation="horizontal">
                 <Input
-                    className="md:text-lg "
+                    className="md:text-lg"
                     placeholder="Search across uploaded files"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
@@ -31,11 +31,11 @@ export default function Search() {
                         }
                     }}
                 />
-                <Button disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
+                <Button aria-label="Search" disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
                     <SearchIcon/>
                 </Button>
                 <Link to={"/"}>
-                    <Button variant="secondary">
+                    <Button aria-label="Home" variant="secondary">
                         <Home/>
                     </Button>
                 </Link>
