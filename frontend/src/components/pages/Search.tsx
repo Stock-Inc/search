@@ -24,6 +24,12 @@ export default function Search() {
                     placeholder="Search across uploaded files"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === "Enter") {
+                            if (files.size === 0) return;
+                            updateSearchQuery();
+                        }
+                    }}
                 />
                 <Button disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
                     <SearchIcon/>

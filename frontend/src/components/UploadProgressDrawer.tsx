@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import type { FileHandle } from "@/lib/types";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function UploadProgressDrawer(
     {
@@ -19,6 +19,7 @@ export default function UploadProgressDrawer(
     }
 ) {
     const [searchQuery, setSearchQuery] = useState("");
+    const navigate = useNavigate();
     
     return (
             <Sheet open={fileList.size > 0} modal={false} disablePointerDismissal>
@@ -29,6 +30,11 @@ export default function UploadProgressDrawer(
                             placeholder="Search across uploaded files"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === "Enter") {
+                                    navigate(`search?query=${searchQuery}`);
+                                }
+                            }}
                         />
                             <Link to={`search?query=${searchQuery}`}>
                                 <Button variant="secondary">
