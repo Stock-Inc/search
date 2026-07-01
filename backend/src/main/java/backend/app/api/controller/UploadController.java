@@ -1,10 +1,19 @@
 package backend.app.api.controller;
 
-import backend.app.api.DocumentTextExtractor;
-import backend.app.api.DocumentUploadResponse;
-import org.springframework.http.HttpStatus;
+import backend.app.api.dto.DocumentResponse;
+import backend.app.api.dto.DocumentUploadResponse;
+import backend.app.api.dto.ErrorResponse;
+import backend.app.api.service.DocumentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,76 +21,45 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
+@RequiredArgsConstructor
+@Tag(name = "Documents", description = "Upload and list indexed documents")
 @RequestMapping("/api/v1/documents")
 public class UploadController {
 
-    private static final long MAX_FILE_SIZE = 20L * 1024 * 1024;
-    private static final Path UPLOAD_DIR = Paths.get(System.getProperty("user.home"), "uploads");
+    private final DocumentService documentService;
 
+    @Operation(summary = "Upload PDF or DOCX document")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Document uploaded and indexed"),
+            @ApiResponse(responseCode = "400", description = "Invalid upload request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file) {
-        try {
-            validateFile(file);
-            Files.createDirectories(UPLOAD_DIR);
-
-            UUID documentId = UUID.randomUUID();
-            String originalName = sanitizeFileName(file.getOriginalFilename());
-            Path savedFile = UPLOAD_DIR.resolve(documentId + getExtension(originalName));
-            file.transferTo(savedFile);
-
-            String text = DocumentTextExtractor.extractText(savedFile);
-            List<String> chunks = DocumentTextExtractor.splitIntoChunks(text);
-
-            return ResponseEntity.ok(new DocumentUploadResponse(
-                    documentId,
-                    originalName,
-                    file.getSize(),
-                    chunks.size(),
-                    chunks
-            ));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        }
+    public DocumentUploadResponse handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
+        return documentService.upload(file);
     }
 
-    private static void validateFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
-        }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File size must not exceed 20 MB");
-        }
-
-        String fileName = sanitizeFileName(file.getOriginalFilename());
-        String extension = getExtension(fileName);
-        if (!extension.equals(".pdf") && !extension.equals(".docx")) {
-            throw new IllegalArgumentException("Supported file formats: PDF, DOCX");
-        }
+    @Operation(summary = "List uploaded documents")
+    @ApiResponse(responseCode = "200", description = "List of uploaded documents")
+    @GetMapping
+    public List<DocumentResponse> documents() {
+        return documentService.findAll();
     }
 
-    private static String sanitizeFileName(String fileName) {
-        if (fileName == null || fileName.isBlank()) {
-            return "upload";
-        }
-        return Paths.get(fileName).getFileName().toString();
-    }
-
-    private static String getExtension(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex < 0) {
-            return "";
-        }
-        return fileName.substring(dotIndex).toLowerCase(Locale.ROOT);
+    @Operation(summary = "Get uploaded document by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Document returned"),
+            @ApiResponse(responseCode = "404", description = "Document not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{documentId}")
+    public DocumentResponse document(@PathVariable UUID documentId) {
+        return documentService.findById(documentId);
     }
 }

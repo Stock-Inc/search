@@ -7,11 +7,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-search}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-search}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
-      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      ELASTICSEARCH_URL: http://elasticsearch:9200
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
-      SPRINGDOC_SWAGGER_UI_PATH: /docs
+      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui/index.html
     ports:
       - "8080:8080"
     depends_on:
@@ -19,8 +19,8 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
-      elasticsearch-setup:
-        condition: service_completed_successfully
+#      elasticsearch-setup:
+#        condition: service_completed_successfully
       redis:
         condition: service_healthy
 
@@ -55,6 +55,7 @@ services:
     container_name: search-elasticsearch
     environment:
       discovery.type: single-node
+      network.host: 0.0.0.0
       xpack.security.enabled: "false"
       ES_JAVA_OPTS: -Xms512m -Xmx512m
     ports:
@@ -73,16 +74,7 @@ services:
       retries: 12
       start_period: 30s
 
-  elasticsearch-setup:
-    image: curlimages/curl:8.17.0
-    container_name: search-elasticsearch-setup
-    working_dir: /setup
-    volumes:
-      - ./elasticsearch:/setup:ro
-    command: ["sh", "setup"]
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+
 
   redis:
     image: redis:8-alpine
@@ -108,24 +100,9 @@ services:
     depends_on:
       - app
 
-  grafana:
-    image: grafana/grafana:12.5.0
-    container_name: search-grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me}
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    depends_on:
-      - prometheus
-
 volumes:
   postgres-data:
   elasticsearch-data:
   redis-data:
   prometheus-data:
-  grafana-data:
+
