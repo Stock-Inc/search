@@ -10,7 +10,7 @@ export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
     const [files, setFiles] = useAtom(fileAtom);
-    const inputRef = useRef(null);
+    const inputRef = useRef<null | HTMLInputElement>(null);
     
     useEffect(() => {
         fetch(`${import.meta.env.VITE_BACKEND_URL}/documents`)
@@ -57,7 +57,7 @@ export default function Upload() {
             const newState = new Map(s);
             for (let i = 0; i < fileList.length; i++) {
                 const file = fileList.item(i);
-                if (newState.has(file.name)) continue;
+                if (!file || newState.has(file.name)) continue;
                 newState.set(file.name, { fileName: file.name, uploadStatus: "uploading" });
                 const formData = new FormData();
                 formData.append("file", file);
@@ -104,7 +104,7 @@ export default function Upload() {
     
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const fileList = e.target.files;
-        uploadFiles(fileList);
+        uploadFiles(fileList ?? new FileList());
     }
     
     return (
@@ -124,7 +124,7 @@ export default function Upload() {
                     <p
                         className="text-xl underline cursor-pointer"
                         onClick={_ => {
-                            inputRef.current.click();
+                            inputRef.current?.click();
                         }}
                     >Drag and drop or click to select</p>
                 </CardContent>

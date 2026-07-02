@@ -23,8 +23,9 @@ export default function Search() {
     }
     
     useEffect(() => {
-        if (params.get("query").trim().length === 0) return;
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/search?q=${params.get("query")}&page=0&size=10`)
+        const query = params.get("query");
+        if (!query || query.trim().length === 0) return;
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/search?q=${query}&page=0&size=10`)
             .then(r => {
                 if (r.ok) {
                     r.json().then(r => {
