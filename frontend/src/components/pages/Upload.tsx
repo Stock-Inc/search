@@ -29,30 +29,59 @@ export default function Upload() {
         e.preventDefault();
     }
     
-    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
-        e.preventDefault();
-        setIsDragging(false);
-        const transferredFiles = e.dataTransfer.files;
+    function uploadFiles(fileList: FileList) {
         setFiles(s => {
             const newState = new Map(s);
-            for (let i = 0; i < transferredFiles.length; i++) {
-                const file = transferredFiles.item(i);    
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList.item(i);
+                if (newState.has(file.name)) continue;
                 newState.set(file.name, { file, uploadStatus: "uploading" });
+                const formData = new FormData();
+                formData.append("file", file);
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/documents/upload`, {
+                    method: "POST",
+                    body: formData
+                }).then(r => {
+                    if (r.ok) {
+                        r.json().then(r => console.log(r));
+                        setFiles(prev => {
+                            const updated = new Map(prev);
+                            updated.set(file.name, { file, uploadStatus: "done" });
+                            return updated;
+                        });
+                    } else {
+                        r.json().then(r => {
+                            console.log(r)
+                            setFiles(prev => {
+                                const updated = new Map(prev);
+                                updated.set(file.name, { file, uploadStatus: "failed" });
+                                return updated;
+                            });
+                        });
+                    }
+                }).catch(e => {
+                    console.log(e);
+                    setFiles(prev => {
+                        const updated = new Map(prev);
+                        updated.set(file.name, { file, uploadStatus: "failed" });
+                        return updated;
+                    });
+                });
             }
             return newState;
         });
     }
     
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+        e.preventDefault();
+        setIsDragging(false);
+        const transferredFiles = e.dataTransfer.files;
+        uploadFiles(transferredFiles)
+    }
+    
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const fileList = e.target.files;
-        setFiles(s => {
-            const newState = new Map(s);
-            for (let i = 0; i < fileList.length; i++) {
-                const file = fileList.item(i);    
-                newState.set(file.name, { file, uploadStatus: "uploading" });
-            }
-            return newState;
-        });
+        uploadFiles(fileList);
     }
     
     return (
