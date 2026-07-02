@@ -10,6 +10,7 @@ import { Separator } from "./ui/separator";
 import type { FileHandle } from "@/lib/types";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function UploadProgressDrawer(
     {
@@ -52,10 +53,41 @@ export default function UploadProgressDrawer(
                                             {name}
                                         </p>
                                         { 
-                                            //TODO: add tooltips
-                                            handle.uploadStatus === "uploading" ? <Spinner className="scale-150" />
-                                                : handle.uploadStatus === "done" ? <Check className="text-green-500" size={25} />
-                                                    : <CloudAlert className="text-red-500" size={25} />
+                                            (function () {
+                                                switch (handle.uploadStatus) {
+                                                    case "failed": return (
+                                                        <Tooltip>
+                                                            <TooltipTrigger>
+                                                                <CloudAlert aria-label="Failed" className="text-red-500" size={25} />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Failed</TooltipContent>
+                                                        </Tooltip>
+                                                    );
+                                                    case "uploading": return (
+                                                        <Tooltip>
+                                                            <TooltipTrigger>
+                                                                <Spinner aria-label="Uploading" className="scale-150" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Upload in progress
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    );
+                                                    case "indexing": return (
+                                                        <Spinner aria-label="Uploading" className="scale-150" />
+                                                    );
+                                                    case "done": return (
+                                                        <Tooltip>
+                                                            <TooltipTrigger>
+                                                                <Check aria-label="Done" className="text-green-500" size={25} />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Upload complete
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    );
+                                                }
+                                            })()
                                         }
                                     </CardContent>
                                 </Card>

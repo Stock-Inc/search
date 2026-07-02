@@ -1,15 +1,38 @@
 import { UploadIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UploadProgressDrawer from "../UploadProgressDrawer";
 import { useAtom } from "jotai";
 import { fileAtom } from "@/lib/atoms";
+import type { FileServerEntry } from "@/lib/types";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
     const [files, setFiles] = useAtom(fileAtom);
-    const inputRef = useRef(null);
+    const inputRef = useRef<null | HTMLInputElement>(null);
+    
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/documents`)
+        .then(r => {
+            if (!r.ok) {
+                console.log(r);
+                return;
+            }
+            r.json().then(r => {
+                setFiles(new Map(
+                    (r as FileServerEntry[]).map(
+                        file => ([
+                            file.fileName, {
+                                fileName: file.fileName,
+                                uploadStatus: "done"
+                            }
+                        ])
+                    )
+                ));
+            });
+        }).catch(e => console.log(e));
+    }, []);
     
     function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault();
@@ -29,30 +52,59 @@ export default function Upload() {
         e.preventDefault();
     }
     
-    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
-        e.preventDefault();
-        setIsDragging(false);
-        const transferredFiles = e.dataTransfer.files;
+    function uploadFiles(fileList: FileList) {
         setFiles(s => {
             const newState = new Map(s);
-            for (let i = 0; i < transferredFiles.length; i++) {
-                const file = transferredFiles.item(i);    
-                newState.set(file.name, { file, uploadStatus: "uploading" });
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList.item(i);
+                if (!file || newState.has(file.name)) continue;
+                newState.set(file.name, { fileName: file.name, uploadStatus: "uploading" });
+                const formData = new FormData();
+                formData.append("file", file);
+                fetch(`${import.meta.env.VITE_BACKEND_URL}/documents/upload`, {
+                    method: "POST",
+                    body: formData
+                }).then(r => {
+                    if (r.ok) {
+                        r.json().then(r => console.log(r));
+                        setFiles(prev => {
+                            const updated = new Map(prev);
+                            updated.set(file.name, { fileName: file.name, uploadStatus: "done" });
+                            return updated;
+                        });
+                    } else {
+                        r.json().then(r => {
+                            console.log(r)
+                            setFiles(prev => {
+                                const updated = new Map(prev);
+                                updated.set(file.name, { fileName: file.name, uploadStatus: "failed" });
+                                return updated;
+                            });
+                        });
+                    }
+                }).catch(e => {
+                    console.log(e);
+                    setFiles(prev => {
+                        const updated = new Map(prev);
+                        updated.set(file.name, { fileName: file.name, uploadStatus: "failed" });
+                        return updated;
+                    });
+                });
             }
             return newState;
         });
     }
     
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+        e.preventDefault();
+        setIsDragging(false);
+        const transferredFiles = e.dataTransfer.files;
+        uploadFiles(transferredFiles)
+    }
+    
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const fileList = e.target.files;
-        setFiles(s => {
-            const newState = new Map(s);
-            for (let i = 0; i < fileList.length; i++) {
-                const file = fileList.item(i);    
-                newState.set(file.name, { file, uploadStatus: "uploading" });
-            }
-            return newState;
-        });
+        uploadFiles(fileList ?? new FileList());
     }
     
     return (
@@ -72,12 +124,12 @@ export default function Upload() {
                     <p
                         className="text-xl underline cursor-pointer"
                         onClick={_ => {
-                            inputRef.current.click();
+                            inputRef.current?.click();
                         }}
                     >Drag and drop or click to select</p>
                 </CardContent>
             </Card>
-            <div className="h-[50vh]"/>
+            <div aria-hidden className="h-[50vh]"/>
             <UploadProgressDrawer fileList={files}/>
             <input
                 ref={inputRef}
