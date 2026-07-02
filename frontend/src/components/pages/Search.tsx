@@ -24,7 +24,7 @@ export default function Search() {
     
     useEffect(() => {
         if (params.get("query").trim().length === 0) return;
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/search?q=${params.get("query")}`)
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/search?q=${params.get("query")}&page=0&size=10`)
             .then(r => {
                 if (r.ok) {
                     r.json().then(r => {

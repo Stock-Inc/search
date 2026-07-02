@@ -1,15 +1,38 @@
 import { UploadIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UploadProgressDrawer from "../UploadProgressDrawer";
 import { useAtom } from "jotai";
 import { fileAtom } from "@/lib/atoms";
+import type { FileServerEntry } from "@/lib/types";
 
 export default function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const dragCount = useRef(0);
     const [files, setFiles] = useAtom(fileAtom);
     const inputRef = useRef(null);
+    
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/documents`)
+        .then(r => {
+            if (!r.ok) {
+                console.log(r);
+                return;
+            }
+            r.json().then(r => {
+                setFiles(new Map(
+                    (r as FileServerEntry[]).map(
+                        file => ([
+                            file.fileName, {
+                                fileName: file.fileName,
+                                uploadStatus: "done"
+                            }
+                        ])
+                    )
+                ));
+            });
+        }).catch(e => console.log(e));
+    }, []);
     
     function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault();
@@ -35,7 +58,7 @@ export default function Upload() {
             for (let i = 0; i < fileList.length; i++) {
                 const file = fileList.item(i);
                 if (newState.has(file.name)) continue;
-                newState.set(file.name, { file, uploadStatus: "uploading" });
+                newState.set(file.name, { fileName: file.name, uploadStatus: "uploading" });
                 const formData = new FormData();
                 formData.append("file", file);
                 fetch(`${import.meta.env.VITE_BACKEND_URL}/documents/upload`, {
@@ -46,7 +69,7 @@ export default function Upload() {
                         r.json().then(r => console.log(r));
                         setFiles(prev => {
                             const updated = new Map(prev);
-                            updated.set(file.name, { file, uploadStatus: "done" });
+                            updated.set(file.name, { fileName: file.name, uploadStatus: "done" });
                             return updated;
                         });
                     } else {
@@ -54,7 +77,7 @@ export default function Upload() {
                             console.log(r)
                             setFiles(prev => {
                                 const updated = new Map(prev);
-                                updated.set(file.name, { file, uploadStatus: "failed" });
+                                updated.set(file.name, { fileName: file.name, uploadStatus: "failed" });
                                 return updated;
                             });
                         });
@@ -63,7 +86,7 @@ export default function Upload() {
                     console.log(e);
                     setFiles(prev => {
                         const updated = new Map(prev);
-                        updated.set(file.name, { file, uploadStatus: "failed" });
+                        updated.set(file.name, { fileName: file.name, uploadStatus: "failed" });
                         return updated;
                     });
                 });
