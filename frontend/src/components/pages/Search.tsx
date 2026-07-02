@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Home, SearchIcon } from "lucide-react";
 import { useAtomValue } from "jotai";
 import { fileAtom } from "@/lib/atoms";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export default function Search() {
     const files = useAtomValue(fileAtom);
@@ -31,14 +32,28 @@ export default function Search() {
                         }
                     }}
                 />
-                <Button aria-label="Search" disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
-                    <SearchIcon/>
-                </Button>
-                <Link to={"/"}>
-                    <Button aria-label="Home" variant="secondary">
-                        <Home/>
-                    </Button>
-                </Link>
+                <Tooltip>
+                    <TooltipTrigger render={
+                        <Button aria-label="Search" disabled={files.size === 0} onClick={updateSearchQuery} variant="secondary">
+                            <SearchIcon/>
+                        </Button> 
+                    }/>
+                    <TooltipContent>
+                        Search
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger render={
+                        <Link to={"/"}>
+                            <Button aria-label="Home" variant="secondary">
+                                <Home/>
+                            </Button>
+                        </Link>
+                    }/>
+                    <TooltipContent>
+                        Home
+                    </TooltipContent>
+                </Tooltip>
             </Field>
             {
                 files.size === 0 ? <p>Upload files to start searching!</p> : <p>Nothing found</p>
