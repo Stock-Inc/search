@@ -45,9 +45,13 @@ public class SearchController {
     @Timed(value = "app.search.requests", description = "Search request latency and count")
     public List<SearchResult> search(
             @Parameter(description = "Search query", example = "искусственный интеллект")
-            @RequestParam("q") @NotBlank String query
+            @RequestParam("q") @NotBlank String query,
+            @Parameter(description = "page", example = "0")
+            int page,
+            @Parameter(description = "size", example = "10")
+            int size
     ) throws Exception {
-        return searchService.search(query, 0, 10);
+        return searchService.search(query, page, size);
     }
 
     @Operation(summary = "List search query history", description = "Returns latest 50 queries with result counts")

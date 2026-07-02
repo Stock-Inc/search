@@ -149,7 +149,7 @@ public class SearchService {
         }
 
         int safePage = Math.max(page, 0);
-        int safeSize = Math.min(Math.max(size, 1), 50);
+        int safeSize = Math.clamp(size, 1, 100);
         String normalizedQuery = query.trim();
         String cacheKey = "search:" + normalizedQuery + ":" + safePage + ":" + safeSize;
         try {
